@@ -1,0 +1,13 @@
+{
+  "name": "reservation-sender",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/src/app.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "build": "tsc",
+    "serve": "tsc && nodemon dist/app.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

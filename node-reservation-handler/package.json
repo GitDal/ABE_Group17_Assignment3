@@ -1,0 +1,18 @@
+{
+  "name": "reservation-handler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/src/app.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "build": "tsc",
+    "serve": "tsc && nodemon dist/app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mongodb": "^3.6.6",
+    "mongoose": "^5.12.3"
+  }
+}
