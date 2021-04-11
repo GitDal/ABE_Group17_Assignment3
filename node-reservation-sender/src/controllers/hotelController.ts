@@ -1,69 +1,33 @@
 import express from "express";
-import { IHotel, IRoom } from "../models/hotel";
+import amqp from "amqplib";
 
-// GET /{hotelId}/room/{roomNumber}
-export async function getRoom(req: express.Request, res: express.Response, next: express.NextFunction) {
-
-    // params
-    const hotelId = req.params.hotelId;
-    const roomNumber = req.params.roomNumber;
-
-    console.log(hotelId);
-    console.log(roomNumber);
-
-    // try {
-    //     let result = await hotelModel.findOne({ _id: hotelId }, { "rooms": { $elemMatch: { "roomNumber": roomNumber } } });
-
-    //     let roomResult = result?.toObject() as IHotel;
-    //     if (!roomResult) {
-    //         res.status(404).send(`The hotel with id=${hotelId} doesn't exist`);
-    //     }
-
-    //     let room = roomResult.rooms[0];
-    //     if (!room) {
-    //         res.status(404).send(`The room with roomNumber=${roomNumber} doesn't exist`);
-    //     }
-
-    //     res.status(200).send(room);
-    // } catch (error) {
-    //     printError("getRoom", error);
-    //     res.status(400).send(error.message);
-    // }
-}
+const rabbitmqConnection = "amqp://localhost";
+const reservationQueue = "reservations";
 
 // PUT {hotelId}/room/{roomNumber}
 export async function reserveRoom(req: express.Request, res: express.Response, next: express.NextFunction) {
 
     //params
-    const hotelId = req.params.hotelId;
-    const roomNumber = req.params.roomNumber;
+    const reservationDetails = req.body as { hotelId: string, roomNumber: number, email: string }
 
-    // userId via webToken
-    // const user = req.user as { email: string };
-    // const reservedByUserId = user.email;
+    const msgJSON = { hotelId: reservationDetails.hotelId, roomNumber: reservationDetails.roomNumber, email: reservationDetails.email };
+    const msg = JSON.stringify(msgJSON);
 
-    console.log(hotelId);
-    console.log(roomNumber);
-    // console.log(user);
+    try {
+        const connection = await amqp.connect(rabbitmqConnection);
+        const channel = await connection.createChannel();
 
-    // try {
-    //     let result = await hotelModel.updateOne(
-    //         { _id: hotelId, "rooms": { $elemMatch: { "roomNumber": roomNumber, "available": true } } },
-    //         { $set: { "rooms.$.available": false, "rooms.$.reservedByUserId": reservedByUserId } });
+        await channel.assertQueue(reservationQueue, {
+            durable: false,
+        });
 
-    //     if (result.nModified === 0) {
-    //         res.status(500).send(`Room with roomNumber=${roomNumber} couldn't be reserved (maybe its already reserved)`)
-    //     } else {
-    //         res.status(200).send(`Reserved room with roomNumber ${roomNumber}!`);
-    //     }
+        channel.sendToQueue(reservationQueue, Buffer.from(msg));
+        console.log(`[x] Sent ${msg}`);
+        
+        res.status(200).send(`Reservation request has been forwarded succesfully`);
 
-    // } catch (error) {
-    //     printError("reserveRoom", error);
-    //     res.status(400).send(error.message);
-    // }
-}
-
-function printError(functionName: string, error: any) {
-    console.log(`** Error from function ${functionName}:`);
-    console.log(error);
+    } catch (error) {
+        console.log(error);
+        res.status(400).send(`Reservation was unable to be forwarded - Try again later`);
+    }
 }
