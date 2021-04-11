@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-const db = process.env.DB as string;
-const port = process.env.DB_PORT as string;
-const dbName = process.env.DB_NAME as string;
+const db = process.env.DB ? process.env.DB : "localhost";
+const port = process.env.DB_PORT ? process.env.DB_PORT : "27017";
+const dbName = process.env.DB_NAME ? process.env.DB_NAME : "ABE";
 
 const mongoUrl = `mongodb://${db}:${port}/${dbName}`;
 
