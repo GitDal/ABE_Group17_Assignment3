@@ -3,6 +3,7 @@ using RabbitMQ.Client.Events;
 using System;
 using Newtonsoft.Json;
 using csharp_confirmation_receiver.Models;
+using System.Text;
 
 namespace csharp_confirmation_receiver
 {
@@ -24,9 +25,19 @@ namespace csharp_confirmation_receiver
                     consumer.Received += (model, ea) =>
                     {
                         //Handle received confirmation-message
-                        var confirmation = JsonConvert.DeserializeObject<ReservationConfirmation>(ea.Body.ToString()); 
-                        var isSuccessMessage = confirmation.successfullyReserved ? $"reserved successfully.\nSending Email to {confirmation.email}" : "couldn't be reserved.";
-                        Console.WriteLine($" [X] Reservation for room {confirmation.roomNumber} at hotel {confirmation.hotelName} {isSuccessMessage}");
+                        try
+                        {
+                            var body = ea.Body.ToArray();
+                            var jsonMessage = Encoding.UTF8.GetString(body);
+                            var confirmation = JsonConvert.DeserializeObject<ReservationConfirmation>(jsonMessage);
+
+                            var isSuccessMessage = confirmation.successfullyReserved ? $"reserved successfully.\nSending Email to {confirmation.email}" : "couldn't be reserved.";
+                            Console.WriteLine($" [X] Reservation for room {confirmation.roomNumber} at hotel {confirmation.hotelName} {isSuccessMessage}");
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine(e.ToString());
+                        }        
                     };
                     channel.BasicConsume(queue: "confirms",
                                          autoAck: true,
