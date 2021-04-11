@@ -10,7 +10,43 @@ namespace csharp_reservation_sender
     {
         static void Main(string[] args)
         {
+            var running = true;
+            var newTextOnScreen = true;
             var factory = new ConnectionFactory() { HostName = "localhost" };
+            Console.WriteLine("[Reservation-system]");
+            while (running)
+            {
+                if(newTextOnScreen)
+                {
+                    Console.WriteLine(" [ENTER]  Create Reservation");
+                    Console.WriteLine(" [ESC]    Exit Program");
+                }
+
+
+                var keyInput = Console.ReadKey(true);
+
+                switch(keyInput.Key)
+                {
+                    case ConsoleKey.Enter: 
+                    {
+                        CreateReservation(factory);
+                        newTextOnScreen = true;
+                        break;
+                    }
+                    case ConsoleKey.Escape:
+                    {
+                        running = false;
+                        break;
+                    }
+                    default:
+                        newTextOnScreen = false;
+                        break;
+                }
+            }
+        }
+
+        private static void CreateReservation(ConnectionFactory factory)
+        {
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -20,11 +56,9 @@ namespace csharp_reservation_sender
                                      autoDelete: false,
                                      arguments: null);
 
-
-                Console.WriteLine("[Reservation-system]");
                 var reservationDetails = GetReservationDetailsFromUser();
-                
-                if(reservationDetails == null) 
+
+                if (reservationDetails == null)
                 {
                     Console.WriteLine("Validation-Error : couldn't generate reservation");
                     return;
@@ -39,21 +73,18 @@ namespace csharp_reservation_sender
                                      body: body);
                 Console.WriteLine($"\n [x] Sent {reservationDetails.ToString()}");
             }
-
-            Console.WriteLine(" Press [enter] to exit.");
-            Console.ReadLine();
         }
 
         private static ReservationDetails GetReservationDetailsFromUser()
         {
             Console.Write("HotelId: ");
             var hotelId = Console.ReadLine();
-            
+
             Console.Write("RoomNumber: ");
             int roomNumber;
             var validRoomNumber = Int32.TryParse(Console.ReadLine(), out roomNumber);
-            
-            if(!validRoomNumber) 
+
+            if (!validRoomNumber)
             {
                 return null;
             }
