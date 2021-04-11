@@ -7,6 +7,7 @@ const dbName = process.env.DB_NAME as string;
 const mongoUrl = `mongodb://${db}:${port}/${dbName}`;
 
 async function connect() {
+    console.log(mongoUrl);
     try {
         await mongoose.connect(mongoUrl, {
             useNewUrlParser: true,

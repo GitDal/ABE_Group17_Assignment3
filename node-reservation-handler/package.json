@@ -15,5 +15,8 @@
     "dotenv": "^8.2.0",
     "mongodb": "^3.6.6",
     "mongoose": "^5.12.3"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.5.17"
   }
 }
