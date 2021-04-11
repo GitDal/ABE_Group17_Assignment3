@@ -4,7 +4,6 @@ import amqp from "amqplib";
 const rabbitmqConnection = "amqp://localhost";
 const reservationQueue = "reservations";
 
-// PUT {hotelId}/room/{roomNumber}
 export async function reserveRoom(req: express.Request, res: express.Response, next: express.NextFunction) {
 
     //params
@@ -23,8 +22,13 @@ export async function reserveRoom(req: express.Request, res: express.Response, n
 
         channel.sendToQueue(reservationQueue, Buffer.from(msg));
         console.log(`[x] Sent ${msg}`);
-        
+
         res.status(200).send(`Reservation request has been forwarded succesfully`);
+
+        setTimeout(async () => {
+            await connection.close();
+        }, 500
+        );
 
     } catch (error) {
         console.log(error);

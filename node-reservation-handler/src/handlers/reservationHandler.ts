@@ -13,28 +13,32 @@ async function handleReservation(msg: ConsumeMessage | null) {
         const roomNumber = reservationRequest.roomNumber;
         const email = reservationRequest.email;
 
-        console.log(hotelId);
-        console.log(roomNumber);
-        console.log(email);
         // Attempt reservation in database.
         try {
-            const hotel: IHotel = await hotelModel.findById({_id: hotelId});
-            
             const result = await hotelModel.updateOne(
                 { _id: hotelId, "rooms": { $elemMatch: { "number": roomNumber, "available": true } } },
                 { $set: { "rooms.$.available": false, "rooms.$.reservedByUserId": email } });
 
+            const hotel = await hotelModel.findById({ _id: hotelId });
+
+            if (!hotel) {
+                console.log(`handleReservation: Invalid hotelId`);
+                return;
+            }
+
+            const hotelInfo = hotel.toObject() as IHotel;
+
             if (result.nModified === 0) {
                 // Reservation unsuccesful - add non-confirm to confirm queue?
                 console.log(`handleReservation: Reservation unsuccesful!`);
-                const msgJSON = {hotelName: hotel.name, hotelId: hotelId, roomNumber: roomNumber, email: email, successfullyReserved: false};
+                const msgJSON = { hotelName: hotelInfo.name, hotelId: hotelId, roomNumber: roomNumber, email: email, successfullyReserved: false };
                 sender("confirms", JSON.stringify(msgJSON));
             } else {
 
 
                 // Reservation succesful - add confirm to confirm queue?
                 console.log(`handleReservation: Reservation succesful!`);
-                const msgJSON = {hotelName: hotel.name, hotelId: hotelId, roomNumber: roomNumber, email: email, successfullyReserved: true};
+                const msgJSON = { hotelName: hotelInfo.name, hotelId: hotelId, roomNumber: roomNumber, email: email, successfullyReserved: true };
 
                 sender("confirms", JSON.stringify(msgJSON));
             }

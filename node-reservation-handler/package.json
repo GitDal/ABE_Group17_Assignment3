@@ -17,6 +17,8 @@
     "mongoose": "^5.12.3"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.5.17"
+    "@types/amqplib": "^0.5.17",
+    "@types/mongodb": "^3.6.10",
+    "@types/mongoose": "^5.10.3"
   }
 }

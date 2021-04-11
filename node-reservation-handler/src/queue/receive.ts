@@ -1,6 +1,6 @@
 import amqp, { ConsumeMessage } from "amqplib"
 
-async function receiver(queueName: string, handler: (msg:ConsumeMessage|null) => void) {
+async function receiver(queueName: string, handler: (msg: ConsumeMessage | null) => void) {
     try {
         const connection = await amqp.connect("amqp://localhost");
         const channel = await connection.createChannel();

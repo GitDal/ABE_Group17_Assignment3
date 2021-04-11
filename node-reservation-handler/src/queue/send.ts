@@ -9,14 +9,13 @@ async function sender(queueName: string, msg: string) {
             durable: false
         });
 
-        channel.sendToQueue(queueName, Buffer.from(msg));
+        const result = channel.sendToQueue(queueName, Buffer.from(msg));
         console.log(`[x] Sent ${msg}`);
 
-         setTimeout(() => {
-             connection.close();
-         //process.exit(0)
-         }, 500
-         );
+        setTimeout(async () => {
+            await connection.close();
+        }, 500
+        );
 
     } catch (error) {
         console.log(error);
